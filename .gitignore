@@ -1,3 +1,5 @@
 node_modules/
-uploads/
-logs/
+uploads/*
+!uploads/.gitkeep
+logs/*
+!logs/.gitkeep
