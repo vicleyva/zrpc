@@ -5,18 +5,12 @@ const app = express()
 // const notesRoutes = require('./routes/NotesRoutes.js');
 app.use(express.json())
 
-// Load routes
+import IndexRoutes from './routes/IndexRoutes.js'
+import NotesRoutes from './routes/NotesRoutes.js'
+import FilesRoutes from './routes/FilesRoutes.js'
 
-// app.use('/', (_, res, next) => {
-//     console.log("hello index")
-//     // next()
-//     res.send("hello index")
-//     // next()
-// })
-
-import NotesRouter from './routes/NotesRoutes.js'
-
-
+// Global Middleware goes first
+// We can use middleware
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
@@ -28,25 +22,21 @@ app.use((req, res, next) => {
     next();
 });
 
+// This will call Index Route using express router
+// No need to define prefix with app.use
+app.use(IndexRoutes)
 
-app.use('/notes', NotesRouter)
 
-// app.use((req, res, next) => {
-//     console.log('use index');
-//     // const error = new HttpError('Could not find this route.', 404);
+// This will call Notes Routes
+// GET    /notes/
+// POST   /notes/
+// PUT    /notes/
+// DELETE /notes/
+// We need to register prefix with app.use
+app.use('/notes', NotesRoutes)
+app.use('/files', FilesRoutes)
 
-//     // throw error;
-// });
 
-app.use((error, req, res, next) => {
-
-    // if (res.headerSent) {
-    //   return next(error);
-    // }
-    // res.status(error.code || 500);
-    // res.json({ message: error.message || 'An unknown error occurred!' });
-    console.log(error);
-});
 
 // Start application on defined port
 app.listen(port, () => {

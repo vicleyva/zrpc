@@ -1,11 +1,27 @@
 import express from 'express';
 import { NotesRepository, NotesDummyRepository } from '../repositories/NotesRepository.js'
 import { Note } from "../entities/Note.js"
-import { NewNoteDto } from "../dtos/NoteDto.js"
+import { NoteDto, NoteShortDto } from "../dtos/Note.js"
+import { mapObjectKeys } from '../utils/mapObjectKeys.js'
 
-
+/** @type {NotesRepository} */
 const notesRepository = new NotesDummyRepository()
-console.log("New Notes Repository Instance...")
+
+
+/**
+ * This method create a new note
+ * @method
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
+export function getNotes(req, res) {
+    res.json({
+        notes: [
+            new NoteShortDto()
+        ]
+    })
+}
 
 /**
  * This method create a new note
@@ -15,14 +31,16 @@ console.log("New Notes Repository Instance...")
  * @param {express.NextFunction} next
  */
 export function createNote(req, res) {
-    console.log("on execution (NotesController.createNote)")
-
     // We  create a new note entity
     // to mutate existing data
-    const newNote = req.body;
-    const note = Note.mapFromDto(newNote)
+    /** @type {NoteDto} */
+    const noteDto = req.body;
 
-    notesRepository.saveNewNote(note)
+    // We must validate request body (to be discussed...)
+
+    // When request body is valid we map the DTO to our Entity
+    // and save into repository
+    notesRepository.saveNewNote(mapObjectKeys(noteDto, Note))
 
     res.status = 201
     res.statusText = "saved!"
@@ -38,18 +56,20 @@ export function createNote(req, res) {
 * @param {express.NextFunction} next
 */
 export function updateNote(req, res) {
-    const existingNote = req.body
-    const note = Note.mapFromDto(existingNote)
+    
+    // We  create a new note entity
+    // to mutate existing data
+    /** @type {NoteDto} */
+    const noteDto = req.body
 
+    /** @type {Note} */
+    const note = mapObjectKeys(noteDto, Note)
+    note.id = req.params.id // Set the ID from URL (/notes/:id)
+
+    // We save the entity using our repository
     notesRepository.updateNote(note)
 
     res.status = 200
     res.statusText = "updated!"
     res.json({ message: "updated" })
 }
-
-
-// exports
-// export default {createNote, updateNote}
-// exports.createPlace = createPlace;
-// exports.updateNote = updateNote;

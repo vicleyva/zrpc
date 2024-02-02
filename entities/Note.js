@@ -1,4 +1,4 @@
-import { NewNoteDto } from '../dtos/NoteDto.js'
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * This is the Note Entity that matches
@@ -7,29 +7,26 @@ import { NewNoteDto } from '../dtos/NoteDto.js'
  * our domain rules (business rules)
  */
 export class Note {
-    /** @type{string}*/         id
-    /** @type{string}*/         title
-    /** @type{string}*/         text
-    /** @type{string|bool}*/    color
-    /** @type{Array<File>}*/    img
-    /** @type{Array<string>}*/  tags
-    constructor({id, title, text, color, img, tags }) {
-        this.id = id || ""
+
+    /**
+     * 
+     * @param {string} id 
+     * @param {string} title 
+     * @param {string} text 
+     * @param {string} color 
+     * @param {Array<File>} imgs 
+     * @param {Array<string>} tags 
+     */
+    constructor(id, title, text, color, imgs, tags) {
+        this.id = id ?? uuidv4() // If no id set, create new id on the fly
         this.title = title
         this.text = text
         this.color = color
-        this.img = img
+        this.imgs = imgs
         this.tags = tags
     }
 
-    /**
-     * This will map data from dto
-     * to our entity.
-     * @method
-     * @param {NewNoteDto} newNote
-     * @return {Note}
-     */
-    static mapFromDto(newNote = new NewNoteDto()) {
-        return new Note(newNote)
-    }
+    // getChecksumFromFile(indx) {
+        
+    // }
 }

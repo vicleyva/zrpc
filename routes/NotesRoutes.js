@@ -1,12 +1,12 @@
 import express from 'express'
-// import { createNote, updateNote } from '../controllers/NotesController.js'
-import { createNote, updateNote } from '../controllers/NotesController.js'
+import multer from 'multer'
+
+import { createNote, updateNote, getNotes } from '../controllers/NotesController.js'
 
 const router = express.Router()
 
-router.post("/notes", createNote)
-router.put("/notes", updateNote)
-// router.post("/", NotesController.createNote)
-// router.put("/", NotesController.updateNote)
+router.get("/", getNotes)
+router.post("/", createNote)
+router.put("/:id", updateNote)
 
 export default router
