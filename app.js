@@ -1,55 +1,59 @@
 import express from 'express'
+import logger from './utils/logger.js'
+import { requestHeadersMiddleware, responseHeadersMiddleware } from './midleware/HeadersMiddleware.js'
+
 const port = 5000;
 const app = express()
 
 // const notesRoutes = require('./routes/NotesRoutes.js');
 app.use(express.json())
 
-// Load routes
+import IndexRoutes from './routes/IndexRoutes.js'
+import NotesRoutes from './routes/NotesRoutes.js'
+import FilesRoutes from './routes/FilesRoutes.js'
 
-// app.use('/', (_, res, next) => {
-//     console.log("hello index")
-//     // next()
-//     res.send("hello index")
-//     // next()
-// })
+// Global Middleware goes first
+// We can use middleware
+app.use(requestHeadersMiddleware);
+app.use(responseHeadersMiddleware);
 
-import NotesRouter from './routes/NotesRoutes.js'
-
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
-
-    next();
-});
+// This will call Index Route using express router
+// No need to define prefix with app.use
+app.use(IndexRoutes)
 
 
-app.use('/notes', NotesRouter)
+// This will call Notes Routes
+// GET    /notes/
+// POST   /notes/
+// PUT    /notes/
+// DELETE /notes/
+// We need to register prefix with app.use
+app.use('/notes', NotesRoutes)
+app.use('/files', FilesRoutes)
 
-// app.use((req, res, next) => {
-//     console.log('use index');
-//     // const error = new HttpError('Could not find this route.', 404);
+// Handle 404
+app.use(async (req, res, next) => {
+    await logger.warn(req, '404 not found! ')
+    res.status(404).json({ msg: ""})
+})
 
-//     // throw error;
-// });
+// Handle Errors
+app.use(async (err, req, res, next) => {
+    // Show stack trace in console only in development (default)
+    const nodeEnv = process.env.NODE_ENV || "development"
+    if(nodeEnv === "development") {
+        console.error(err.stack)
+    }
+    // Is good practice to log these errors to a file
+    const e = err.stack.split("\n")
+    await logger.error(req, e.join(''))
+    res.status(500).send('Something broke!')
+})
 
-app.use((error, req, res, next) => {
 
-    // if (res.headerSent) {
-    //   return next(error);
-    // }
-    // res.status(error.code || 500);
-    // res.json({ message: error.message || 'An unknown error occurred!' });
-    console.log(error);
-});
 
 // Start application on defined port
 app.listen(port, () => {
-    console.log(`Server is listening at http://localhost:${port}`);
+    console.log(`[application] Server is listening at http://localhost:${port}`);
 });
 
