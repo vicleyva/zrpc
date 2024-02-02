@@ -40,7 +40,7 @@ export default class HomeController {
         res.send(strategy.sayHelloWorld(name))
     }
 
-    languageFactory(lang = "en") {
+    static languageFactory(lang = "en") {
         const _lang = lang.toLowerCase()
         if (_lang == "es") {
             return new SpanishHomeStrategy()

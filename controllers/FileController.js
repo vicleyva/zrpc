@@ -1,8 +1,9 @@
 import express from 'express';
+import logger from '../utils/logger.js'
 import { NotesRepository, NotesDummyRepository } from '../repositories/NotesRepository.js'
 
 /** @type {NotesRepository} */
-const notesRepository = new NotesDummyRepository()
+const notesRepository = NotesDummyRepository.getInstance()
 
 /**
  * This method create a new note
@@ -11,7 +12,11 @@ const notesRepository = new NotesDummyRepository()
  * @param {express.Response} res
  * @param {express.NextFunction} next
  */
-export function uploadFile(req, res) {
+export async function uploadFile(req, res) {
+    const msg = `File ${req.file.filename} has been saved`
+    await logger.info(req, msg)
+    console.log(msg)
+
     res.send({
         msg: "file received",
         file: req.file
@@ -26,7 +31,7 @@ export function uploadFile(req, res) {
  * @param {express.Response} res
  * @param {express.NextFunction} next
  */
-export function uploadFileList(req, res) {
+export async function uploadFileList(req, res) {
     // Tip: Save req.files.filename as the file ID (hashed by multer)
     res.send({
         msg: "file list received",

@@ -1,9 +1,9 @@
 /**
- * Map keys from object to object
+ * Map keys from object to class
  * 
  * @param {object} objFrom 
- * @param {object} objTo 
- * @returns 
+ * @param {class}  objTo 
+ * @returns {class}
  */
 export const mapObjectKeys = (objFrom, objTo) => {
     const x = new objTo()

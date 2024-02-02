@@ -1,3 +1,5 @@
+import NotImplementedException from "../exceptions/NotImplementedException.js";
+
 /**
  * This method create a new note
  * @method
@@ -5,7 +7,7 @@
  * @param {express.Response} res
  * @param {express.NextFunction} next
  */
-
 export function index(req, res) {
-    res.send("Hello index")
+    throw new NotImplementedException()
+    // res.send("Hello index")
 }
