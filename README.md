@@ -1,5 +1,11 @@
 # Zrpc
 
+[![Hex.pm](https://img.shields.io/hexpm/v/zrpc.svg)](https://hex.pm/packages/zrpc)
+[![Hex.pm Downloads](https://img.shields.io/hexpm/dt/zrpc.svg)](https://hex.pm/packages/zrpc)
+[![CI](https://github.com/wavezync/zrpc/actions/workflows/ci.yml/badge.svg)](https://github.com/wavezync/zrpc/actions/workflows/ci.yml)
+[![License](https://img.shields.io/hexpm/l/zrpc.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-hexdocs-blue.svg)](https://hexdocs.pm/zrpc)
+
 A modern RPC framework for Elixir with a clean DSL, middleware system, and hierarchical routing. Define your API once, generate TypeScript clients and OpenAPI specs automatically.
 
 Zrpc provides a type-safe, transport-agnostic way to define and execute remote procedure calls. It's inspired by tRPC and designed to work seamlessly with Phoenix, Plug, or any Elixir application. Your procedure definitions serve as the **single source of truth** for validation, documentation, and client generation.
