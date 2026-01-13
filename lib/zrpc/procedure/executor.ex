@@ -10,8 +10,8 @@ defmodule Zrpc.Procedure.Executor do
   - Telemetry events throughout
   """
 
-  alias Zrpc.Procedure.Definition
   alias Zrpc.Context
+  alias Zrpc.Procedure.Definition
 
   require Logger
 
@@ -65,10 +65,14 @@ defmodule Zrpc.Procedure.Executor do
       metadata
     )
 
+    # Use middleware from opts if provided (router passes pre-computed chain),
+    # otherwise use the procedure's inline middleware
+    middleware = Keyword.get(opts, :middleware, proc.middleware)
+
     result =
       with {:ok, ctx} <- run_before_hooks(opts[:before_hooks] || [], ctx, raw_input, proc),
            {:ok, input} <- validate_input(proc, raw_input),
-           {:ok, ctx} <- run_middleware_chain(proc.middleware, ctx),
+           {:ok, ctx} <- run_middleware_chain(middleware, ctx),
            {:ok, output} <- execute_handler(proc, input, ctx),
            {:ok, validated_output} <- maybe_validate_output(proc, output, opts),
            {:ok, final_output} <-
