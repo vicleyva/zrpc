@@ -211,38 +211,36 @@ defmodule Zrpc.Router do
   end
 
   defp resolve_path(router_module, path) do
-    # First try direct lookup
     case router_module.__zrpc_entry__(path) do
+      nil -> resolve_via_alias(router_module, path)
+      entry -> {:ok, entry, :direct}
+    end
+  end
+
+  defp resolve_via_alias(router_module, path) do
+    case router_module.__zrpc_alias__(path) do
+      nil -> {:error, not_found_error(router_module, path)}
+      %Alias{} = alias_def -> resolve_alias_target(router_module, path, alias_def)
+    end
+  end
+
+  defp resolve_alias_target(router_module, path, %Alias{to: canonical, deprecated: deprecated}) do
+    case router_module.__zrpc_entry__(canonical) do
       nil ->
-        # Try alias resolution
-        case router_module.__zrpc_alias__(path) do
-          nil ->
-            {:error,
-             %{
-               code: :not_found,
-               message: "Procedure not found: #{path}",
-               path: path,
-               suggestions: find_similar_paths(router_module, path)
-             }}
-
-          %Alias{to: canonical, deprecated: deprecated} ->
-            case router_module.__zrpc_entry__(canonical) do
-              nil ->
-                {:error,
-                 %{
-                   code: :not_found,
-                   message: "Alias target not found: #{canonical}",
-                   path: path
-                 }}
-
-              entry ->
-                {:ok, entry, {:alias, path, canonical, deprecated}}
-            end
-        end
+        {:error, %{code: :not_found, message: "Alias target not found: #{canonical}", path: path}}
 
       entry ->
-        {:ok, entry, :direct}
+        {:ok, entry, {:alias, path, canonical, deprecated}}
     end
+  end
+
+  defp not_found_error(router_module, path) do
+    %{
+      code: :not_found,
+      message: "Procedure not found: #{path}",
+      path: path,
+      suggestions: find_similar_paths(router_module, path)
+    }
   end
 
   defp find_similar_paths(router_module, path) do
@@ -331,7 +329,11 @@ defmodule Zrpc.Router do
 
       if scope_stack == [] do
         # Router-level middleware
-        Module.put_attribute(__MODULE__, :zrpc_router_middleware, {unquote(module), unquote(opts)})
+        Module.put_attribute(
+          __MODULE__,
+          :zrpc_router_middleware,
+          {unquote(module), unquote(opts)}
+        )
       else
         # Scope-level middleware
         current_mw = Module.get_attribute(__MODULE__, :zrpc_scope_middleware)

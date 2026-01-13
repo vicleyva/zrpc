@@ -74,10 +74,8 @@ defmodule Zrpc.Procedure.Executor do
            {:ok, input} <- validate_input(proc, raw_input),
            {:ok, ctx} <- run_middleware_chain(middleware, ctx),
            {:ok, output} <- execute_handler(proc, input, ctx),
-           {:ok, validated_output} <- maybe_validate_output(proc, output, opts),
-           {:ok, final_output} <-
-             run_after_hooks(opts[:after_hooks] || [], ctx, validated_output, proc) do
-        {:ok, final_output}
+           {:ok, validated_output} <- maybe_validate_output(proc, output, opts) do
+        run_after_hooks(opts[:after_hooks] || [], ctx, validated_output, proc)
       end
 
     duration = System.monotonic_time() - start_time
@@ -153,7 +151,7 @@ defmodule Zrpc.Procedure.Executor do
   defp run_middleware_chain([middleware | rest], ctx) do
     {mod, opts} = normalize_middleware(middleware)
 
-    case apply(mod, :call, [ctx, opts, fn ctx -> run_middleware_chain(rest, ctx) end]) do
+    case mod.call(ctx, opts, fn ctx -> run_middleware_chain(rest, ctx) end) do
       {:ok, ctx} -> {:ok, ctx}
       {:error, _} = error -> error
     end
